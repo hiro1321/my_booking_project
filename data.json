@@ -1,0 +1,63 @@
+[
+  {
+    "model": "reservations.customer",
+    "pk": 1,
+    "fields": {
+      "name": "customerName",
+      "phone": "09000000001",
+      "email": "sample@samplemail.com",
+      "address": "東京都◯◯区bbb１−１−１"
+    }
+  },
+  {
+    "model": "reservations.customer",
+    "pk": 2,
+    "fields": {
+      "name": "customerName02",
+      "phone": "09000000002",
+      "email": "sample@samplemail.com",
+      "address": "東京都◯◯区bbb１−１−１"
+    }
+  },
+  {
+    "model": "reservations.room",
+    "pk": 1,
+    "fields": {
+      "room_number": "203",
+      "room_type": "シングル",
+      "price": "6000.00",
+      "availability": true
+    }
+  },
+  {
+    "model": "reservations.room",
+    "pk": 2,
+    "fields": {
+      "room_number": "204",
+      "room_type": "シングル",
+      "price": "6000.00",
+      "availability": true
+    }
+  },
+  {
+    "model": "reservations.reservation",
+    "pk": 1,
+    "fields": {
+      "customer": 1,
+      "room": 1,
+      "start_datetime": "2024-02-04T22:18:07Z",
+      "end_datetime": "2024-02-05T22:18:41Z",
+      "payment_info": "現地で現金払い"
+    }
+  },
+  {
+    "model": "reservations.payment",
+    "pk": 1,
+    "fields": {
+      "reservation": 1,
+      "amount": "3000.00",
+      "payment_datetime": "2024-02-04T22:20:16Z",
+      "payment_method": "現金"
+    }
+  }
+]
