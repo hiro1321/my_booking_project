@@ -13,12 +13,15 @@ SECRET_KEY = "django-insecure-++=-s62s9!qv-7et4t29f7_)k-($sc%!uqw5tj8-ezumxl+oy^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
+# Application definition
+
 # CSRF認証の設定
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+# ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
 CORS_ALLOW_CREDENTIALS = True
-# Application definition
+CORS_ORIGIN_WHITELIST = ["http://localhost:3000"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -33,30 +36,8 @@ INSTALLED_APPS = [
 ]
 
 
-# CorsMiddleware の設定
-CORS_ALLOW_HEADERS = [
-    "accept",
-    "accept-encoding",
-    "authorization",
-    "Content-Type",
-    "dnt",
-    "origin",
-    "user-agent",
-    "x-csrftoken",
-    "x-requested-with",
-    "X-CSRFToken",
-]
-CORS_ALLOW_METHODS = [
-    "DELETE",
-    "GET",
-    "OPTIONS",
-    "PATCH",
-    "POST",
-    "PUT",
-]
-
-
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -64,7 +45,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "my_booking_project.urls"

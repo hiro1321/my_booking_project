@@ -29,6 +29,7 @@ def room_detail(request, room_id):
     try:
         room = Room.objects.get(pk=room_id)
         serializer = RoomSerializer(room)
-        return JsonResponse(serializer.data)
+        response = JsonResponse(serializer.data)
+        return response
     except Room.DoesNotExist:
         return JsonResponse({"error": "Room not found"}, status=404)
