@@ -28,8 +28,16 @@ class RoomListView(ListAPIView):
 def room_detail(request, room_id):
     try:
         room = Room.objects.get(pk=room_id)
-        serializer = RoomSerializer(room)
-        response = JsonResponse(serializer.data)
-        return response
     except Room.DoesNotExist:
         return JsonResponse({"error": "Room not found"}, status=404)
+
+    if request.method == "GET":
+        serializer = RoomSerializer(room)
+        return JsonResponse(serializer.data)
+
+    elif request.method == "PUT":
+        data = request.body
+        serializer = RoomSerializer(room, data=data)
+
+        serializer.save()
+        return JsonResponse(serializer.data)
