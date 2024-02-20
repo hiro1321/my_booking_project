@@ -1,9 +1,9 @@
+from datetime import datetime
 from django.shortcuts import render
 import json
 from rest_framework.decorators import api_view
 from django.http.response import JsonResponse
-from rest_framework.generics import ListAPIView
-from ..models import Room
+from ..models import Room, Reservation
 from ..serializers import RoomSerializer
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -12,26 +12,20 @@ from ..serializers import RoomSerializer
 
 
 @api_view(["GET"])
-def getRoomAvailability(request):
+def getRoomAvailability(request, date):
     """対象日付の予約可能な部屋数を返す"""
-    # パスの日付の型を変換
+    # 予約可能な部屋の数を取得
+    room_cnt = Room.objects.filter(availability=True).count()
 
-    # 予約可能部屋数をget
+    # 予約が埋まっている数を取得
+    date_obj = datetime.strptime(date, "%Y%m%d")
+    reservation_count = Reservation.objects.filter(
+        start_datetime__lte=date_obj, end_datetime__gte=date_obj
+    ).count()
 
-    # 予約が埋まっている部屋数をゲット
-    # SELECT count(*) FROM Reservation WHERE  startDate <= 日付 and 日付 <= endDate and room.availability = true;
-
-    if request.method == "GET":
-        token = get_token(request)
-        print(token)
-        return JsonResponse({"csrfToken": token})
-    else:
-        return JsonResponse({"error": "CSRFトークンを取得できませんでした"}, status=400)
-
-
-class RoomListView(ListAPIView):
-    queryset = Room.objects.all()
-    serializer_class = RoomSerializer
+    result = room_cnt - reservation_count
+    print(result)
+    return JsonResponse({"result": result})
 
 
 def room_detail(request, room_id):
