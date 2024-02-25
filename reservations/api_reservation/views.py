@@ -1,14 +1,12 @@
 from datetime import datetime
 from django.shortcuts import render
-import json
+from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from django.http.response import JsonResponse
-from ..models import Room, Reservation
-from ..serializers import RoomSerializer
-from django.views.decorators.csrf import csrf_exempt
+from ..models import Room, Reservation, Customer
+from django.utils.timezone import make_aware
 from django.http import JsonResponse
-from django.middleware.csrf import get_token
-from ..serializers import RoomSerializer
+from ..helpers.reservation_input_obj import ReservationInputData
+from django.db import transaction
 
 
 @api_view(["GET"])
@@ -37,3 +35,44 @@ def getRoomAvailability(request, date):
 
     result = room_cnt - reservation_count
     return JsonResponse({"result": result})
+
+
+@api_view(["POST"])
+def submitReservation(request):
+
+    #  入力データをチェック
+    data = request.data
+    print(data)
+    reservation_input_data = ReservationInputData(
+        room_number=data.get("roomNumber"),
+        checkin_date=data.get("checkInDate"),
+        checkout_date=data.get("checkOutDate"),
+        checkin_time=data.get("checkInTime"),
+        checkout_time=data.get("checkOutTime"),
+        name=data.get("name"),
+        address=data.get("address"),
+        phone_number=data.get("phoneNumber"),
+        email=data.get("email"),
+    )
+    error_list = reservation_input_data.validate()
+
+    # エラーがある場合、ステータス400で終了
+    if len(error_list) != 0:
+        return Response({"errors": error_list}, status=400)
+
+    # Customerオブジェクトを作成
+    customer = reservation_input_data.create_customer()
+
+    try:
+        # トランザクションを開始して顧客と予約を保存
+        with transaction.atomic():
+            customer.save()
+            reservation = reservation_input_data.create_reservation(customer)
+            reservation.save()
+    except Exception as e:
+        # エラーが発生した場合はロールバック
+        customer.delete()
+        return Response({"errors": ["予約登録中にエラーが発生しました"]}, status=400)
+
+    # レスポンスを返す
+    return Response({"message": "success"}, status=201)

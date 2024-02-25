@@ -12,6 +12,11 @@ urlpatterns = [
         res_vi.getRoomAvailability,
         name="availability_cnt",
     ),
+    path(
+        "reservations/submit",
+        res_vi.submitReservation,
+        name="submit_reservation",
+    ),
     path("admin/login", admin_vi.admin_login, name="admin_login"),
     path("admin/verify-token", admin_vi.verify_token, name="verify_token"),
     path("admin/logout", admin_vi.admin_logout, name="admin_logout"),
