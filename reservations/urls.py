@@ -17,6 +17,23 @@ urlpatterns = [
         res_vi.submitReservation,
         name="submit_reservation",
     ),
+    path("reservations/", res_vi.reservation_list, name="reservation_list"),
+    path(
+        "reservations/<int:reservation_id>/",
+        res_vi.reservation_detail,
+        name="reservation_detail",
+    ),
+    path("reservations/create/", res_vi.reservation_create, name="reservation_create"),
+    path(
+        "reservations/<int:reservation_id>/edit/",
+        res_vi.reservation_edit,
+        name="reservation_edit",
+    ),
+    path(
+        "reservations/<int:reservation_id>/delete/",
+        res_vi.reservation_delete,
+        name="reservation_delete",
+    ),
     path("admin/login", admin_vi.admin_login, name="admin_login"),
     path("admin/verify-token", admin_vi.verify_token, name="verify_token"),
     path("admin/logout", admin_vi.admin_logout, name="admin_logout"),
