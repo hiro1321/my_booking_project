@@ -47,7 +47,7 @@ def submitReservation(request):
     data = request.data
     print(data)
     reservation_input_data = ReservationInputData(
-        room_number=data.get("roomNumber"),
+        room_number=data.get("roomNumberInput"),
         checkin_date=data.get("checkInDate"),
         checkout_date=data.get("checkOutDate"),
         checkin_time=data.get("checkInTime"),
@@ -163,8 +163,8 @@ def reservation_edit(request, reservation_id):
         return JsonResponse(data)
 
 
+@api_view(["DELETE"])
 def reservation_delete(request, reservation_id):
     reservation = get_object_or_404(Reservation, pk=reservation_id)
-    if request.method == "DELETE":
-        reservation.delete()
-        return JsonResponse({"message": "Reservation deleted successfully"}, status=204)
+    reservation.delete()
+    return JsonResponse({"message": "success"})

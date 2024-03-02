@@ -65,16 +65,18 @@ class ReservationInputData:
         ):
             err_list.append("有効なメールアドレスを入力してください。")
 
-        # 選択した部屋の存在チェック
-        room_count = Room.objects.filter(room_number=self.room_number).count()
-        if room_count == 0:
-            err_list.append("対象の部屋は存在しません。")
-
         # チェックアウト日がチェックイン日の後であることをチェック
         if self.checkout_date <= self.checkin_date:
             err_list.append(
                 "チェックアウト日はチェックイン日の後にする必要があります。"
             )
+
+        # 選択した部屋の存在チェック
+        room_count = Room.objects.filter(room_number=self.room_number).count()
+        if room_count == 0:
+            err_list.append("対象の部屋は存在しません。")
+            # 処理を終了
+            return err_list
 
         # 対象の日付に空きをチェック
         reservation_count = Reservation.objects.filter(
