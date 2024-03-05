@@ -2,14 +2,14 @@ from datetime import datetime
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from ..models import Room, Reservation, Customer
-from django.utils.timezone import make_aware
+from ..models import Room, Reservation
 from django.http import JsonResponse
 from ..helpers.reservation_input_obj import ReservationInputData
 from django.db import transaction
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from .forms import ReservationForm
 from django.forms.models import model_to_dict
+from ..helpers.reservation_form_obj import ReservationFormObject
 
 
 @api_view(["GET"])
@@ -42,21 +42,9 @@ def getRoomAvailability(request, date):
 
 @api_view(["POST"])
 def submitReservation(request):
-
     #  入力データをチェック
-    data = request.data
-    print(data)
-    reservation_input_data = ReservationInputData(
-        room_number=data.get("roomNumberInput"),
-        checkin_date=data.get("checkInDate"),
-        checkout_date=data.get("checkOutDate"),
-        checkin_time=data.get("checkInTime"),
-        checkout_time=data.get("checkOutTime"),
-        name=data.get("name"),
-        address=data.get("address"),
-        phone_number=data.get("phoneNumber"),
-        email=data.get("email"),
-    )
+    data: dict = request.data
+    reservation_input_data = ReservationInputData(request_data=data, reservation_id="")
     error_list = reservation_input_data.validate()
 
     # エラーがある場合、ステータス400で終了
@@ -85,82 +73,53 @@ def reservation_list(request):
     print("start debug")
     if request.method == "GET":
         reservations = Reservation.objects.all().select_related("customer", "room")
-        reservation_data = []
-        for reservation in reservations:
-            reservation_info = {
-                "id": reservation.id,
-                "customer_id": reservation.customer.id,
-                "customer_name": reservation.customer.name,
-                "customer_phone": reservation.customer.phone,
-                "customer_email": reservation.customer.email,
-                "customer_address": reservation.customer.address,
-                "room_id": reservation.room.id,
-                "room_number": reservation.room.room_number,
-                "room_type": reservation.room.room_type,
-                "room_price": float(reservation.room.price),
-                "room_availability": reservation.room.availability,
-                "start_datetime": reservation.start_datetime,
-                "end_datetime": reservation.end_datetime,
-                "payment_info": reservation.payment_info,
-            }
-            reservation_data.append(reservation_info)
+        reservation_data = [
+            ReservationFormObject(reservation).__dict__ for reservation in reservations
+        ]
         return JsonResponse({"reservations": reservation_data})
 
-    elif request.method == "POST":
-        form = ReservationForm(request.POST)
-        if form.is_valid():
-            reservation = form.save()
-            return JsonResponse(
-                {
-                    "message": "Reservation created successfully",
-                    "reservation_id": reservation.id,
-                },
-                status=201,
-            )
-        else:
-            return JsonResponse({"errors": form.errors}, status=400)
 
-
+@api_view(["GET"])
 def reservation_detail(request, reservation_id):
+    """予約IDをもとに、予約情報を返却"""
     reservation = get_object_or_404(Reservation, pk=reservation_id)
-    data = {"reservation": model_to_dict(reservation)}
+    data = {"reservation": ReservationFormObject(reservation).__dict__}
     return JsonResponse(data)
 
 
+@api_view(["POST"])
 def reservation_create(request):
-    if request.method == "POST":
-        form = ReservationForm(request.POST)
-        if form.is_valid():
-            reservation = form.save()
-            return JsonResponse(
-                {
-                    "message": "Reservation created successfully",
-                    "reservation_id": reservation.id,
-                },
-                status=201,
-            )
-        else:
-            return JsonResponse({"errors": form.errors}, status=400)
+    form = ReservationForm(request.POST)
+    if form.is_valid():
+        reservation = form.save()
+        return JsonResponse(
+            {
+                "message": "Reservation created successfully",
+                "reservation_id": reservation.id,
+            },
+            status=201,
+        )
 
 
+@api_view(["POST"])
 def reservation_edit(request, reservation_id):
-    reservation = get_object_or_404(Reservation, pk=reservation_id)
-    if request.method == "PUT":
-        form = ReservationForm(request.POST, instance=reservation)
-        if form.is_valid():
-            reservation = form.save()
-            return JsonResponse(
-                {
-                    "message": "Reservation updated successfully",
-                    "reservation_id": reservation.id,
-                },
-                status=200,
-            )
-        else:
-            return JsonResponse({"errors": form.errors}, status=400)
-    elif request.method == "GET":
-        data = {"reservation": model_to_dict(reservation)}
-        return JsonResponse(data)
+    data: dict = request.data
+    reservation_input_data = ReservationInputData(data, reservation_id)
+    error_list = reservation_input_data.validate()
+
+    # エラーがある場合、ステータス400で終了
+    if len(error_list) != 0:
+        print(error_list)
+        return Response({"errors": error_list}, status=400)
+
+    reservation_input_data.update_reservation()
+    return JsonResponse(
+        {
+            "message": "Reservation created successfully",
+            "reservation_id": reservation_id,
+        },
+        status=200,
+    )
 
 
 @api_view(["DELETE"])
