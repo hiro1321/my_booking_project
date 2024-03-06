@@ -24,6 +24,7 @@ class Reservation(models.Model):
     start_datetime = models.DateTimeField()
     end_datetime = models.DateTimeField()
     payment_info = models.TextField()
+    is_paid = models.BooleanField(default=False)
 
 
 class Payment(models.Model):

@@ -1,14 +1,17 @@
+import os
+from django.conf import settings
 from datetime import datetime
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from ..models import Room, Reservation
 from django.http import JsonResponse
+from django.http import HttpResponse
 from ..helpers.reservation_input_obj import ReservationInputData
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from .forms import ReservationForm
-from django.forms.models import model_to_dict
+
 from ..helpers.reservation_form_obj import ReservationFormObject
 
 
@@ -127,3 +130,38 @@ def reservation_delete(request, reservation_id):
     reservation = get_object_or_404(Reservation, pk=reservation_id)
     reservation.delete()
     return JsonResponse({"message": "success"})
+
+
+@api_view(["POST"])
+def reservation_ispaid_edit(request, reservation_id):
+    data: dict = request.data
+    is_paid: bool = data.get("is_paid")
+    reservation = Reservation.objects.get(id=reservation_id)
+    reservation.is_paid = is_paid
+    reservation.save()
+
+    return JsonResponse(
+        {
+            "message": "支払状態の更新に成功しました",
+            "reservation_id": reservation_id,
+        },
+        status=200,
+    )
+
+
+def get_reception_file(request, reservation_id):
+    # Excelファイルのパスを取得
+    file_name = "reception-template.xlsx"  # テンプレートディレクトリ内のパス
+    file_path = os.path.join(settings.BASE_DIR, "templates", file_name)
+
+    # レスポンスを作成し、Excelファイルを返す
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="reception-template.xlsx"'
+
+    # テンプレートファイルの内容を取得し、レスポンスに書き込む
+    with open(file_path, "rb") as f:
+        response.write(f.read())
+
+    return response

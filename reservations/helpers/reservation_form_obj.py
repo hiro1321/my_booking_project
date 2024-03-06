@@ -21,6 +21,7 @@ class ReservationFormObject:
     start_datetime: datetime
     end_datetime: datetime
     payment_info: str
+    is_paid: bool
 
     def __init__(self, reservation: Reservation):
         self.id = reservation.id
@@ -37,3 +38,4 @@ class ReservationFormObject:
         self.start_datetime = reservation.start_datetime
         self.end_datetime = reservation.end_datetime
         self.payment_info = reservation.payment_info
+        self.is_paid = reservation.is_paid

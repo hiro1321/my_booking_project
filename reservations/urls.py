@@ -34,6 +34,16 @@ urlpatterns = [
         res_vi.reservation_delete,
         name="reservation_delete",
     ),
+    path(
+        "reservations/<int:reservation_id>/is_paid/edit/",
+        res_vi.reservation_ispaid_edit,
+        name="reservation_ispaid_edit",
+    ),
+    path(
+        "reservations/<int:reservation_id>/get_reception_file/",
+        res_vi.get_reception_file,
+        name="get_reception_file",
+    ),
     path("admin/login", admin_vi.admin_login, name="admin_login"),
     path("admin/verify-token", admin_vi.verify_token, name="verify_token"),
     path("admin/logout", admin_vi.admin_logout, name="admin_logout"),
