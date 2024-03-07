@@ -11,6 +11,8 @@ from ..helpers.reservation_input_obj import ReservationInputData
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from .forms import ReservationForm
+from openpyxl import load_workbook
+import tempfile
 
 from ..helpers.reservation_form_obj import ReservationFormObject
 
@@ -150,18 +152,37 @@ def reservation_ispaid_edit(request, reservation_id):
 
 
 def get_reception_file(request, reservation_id):
+    reservation = Reservation.objects.get(id=reservation_id)
+
     # Excelファイルのパスを取得
-    file_name = "reception-template.xlsx"  # テンプレートディレクトリ内のパス
-    file_path = os.path.join(settings.BASE_DIR, "templates", file_name)
+    template_file_name = "reception-template.xlsx"
+    template_file_path = os.path.join(
+        settings.BASE_DIR, "templates", template_file_name
+    )
+
+    # テンプレートの読み込み
+    workbook = load_workbook(template_file_path)
+    sheet = workbook.active
+
+    # 予約情報を書き込む
+    sheet["A3"] = reservation.customer.name
+    sheet["B11"] = reservation.room.room_number
+    sheet["B12"] = reservation.start_datetime.strftime("%Y-%m-%d %H:%M:%S")
+    sheet["B13"] = reservation.end_datetime.strftime("%Y-%m-%d %H:%M:%S")
+
+    # 一時ディレクトリの作成
+    temp_dir = tempfile.mkdtemp()
+
+    # Excelファイルを保存
+    response_file_path = os.path.join(temp_dir, "reception-output.xlsx")
+    workbook.save(response_file_path)
 
     # レスポンスを作成し、Excelファイルを返す
-    response = HttpResponse(
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-    response["Content-Disposition"] = 'attachment; filename="reception-template.xlsx"'
-
-    # テンプレートファイルの内容を取得し、レスポンスに書き込む
-    with open(file_path, "rb") as f:
-        response.write(f.read())
+    with open(response_file_path, "rb") as f:
+        response = HttpResponse(
+            f.read(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = 'attachment; filename="reception-output.xlsx"'
 
     return response
