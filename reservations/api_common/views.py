@@ -1,7 +1,10 @@
-from django.shortcuts import render
 import json
+import base64
+from django.shortcuts import render
 from django.http.response import JsonResponse
+from django.core.files.base import ContentFile
 from rest_framework.generics import ListAPIView
+from rest_framework.decorators import api_view
 from ..models import Room
 from ..serializers import RoomSerializer
 from django.views.decorators.csrf import csrf_exempt
@@ -37,10 +40,28 @@ def room_detail(request, room_id):
 
     elif request.method == "PUT":
         data = json.loads(request.body.decode("utf-8"))
-        serializer = RoomSerializer(room, data=data)
+        room = Room.objects.get(pk=room_id)
+        room.room_number = data.get("room_number")
+        room.room_type = data.get("room_type")
+        room.price = float(data.get("price"))
+        room.availability = True
+        room_image_base64 = data["room_image"]
+        room_image_data = base64.b64decode(room_image_base64)
+        room.room_image.save("room_image.png", ContentFile(room_image_data))
+        room.save()
 
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        else:
-            return JsonResponse(serializer.errors, status=400)
+        return JsonResponse({"message": "Room data saved successfully"})
+
+
+@api_view(["POST"])
+def room_submit(request):
+    data: dict = request.data
+    room = Room(
+        room_number=data.get("room_number"),
+        room_type=data.get("room_type"),
+        price=data.get("price"),
+        availability=(True),
+    )
+    room.save()
+    # 登録された Room の情報をレスポンスとして返す
+    return JsonResponse({"message": "Room data saved successfully"})

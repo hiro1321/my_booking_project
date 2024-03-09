@@ -11,6 +11,7 @@ class Customer(models.Model):
 class Room(models.Model):
     room_number = models.CharField(max_length=20)
     room_type = models.CharField(max_length=50)
+    room_image = models.ImageField(upload_to="room_images/", null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     availability = models.BooleanField(default=True)
 
