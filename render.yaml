@@ -14,7 +14,7 @@ services:
     branch: master
     healthCheckPath: /
     buildCommand: './build.sh'
-    startCommand: 'gunicorn my_booking_project.wsgi --log-file -'
+    startCommand: 'gunicorn mysite.wsgi --log-file -'
     envVars:
       - key: DATABASE_URL
         fromDatabase:
