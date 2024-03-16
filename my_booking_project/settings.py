@@ -36,9 +36,15 @@ DEBUG = True
 
 # CSRF認証の設定
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "https://my-booking-app-gilt.vercel.app",
+]
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = ["http://localhost:3000"]
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:3000",
+    "https://my-booking-app-gilt.vercel.app",
+]
 
 
 INSTALLED_APPS = [
