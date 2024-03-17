@@ -8,6 +8,7 @@ from rest_framework.decorators import api_view
 from ..models import Room
 from ..serializers import RoomSerializer
 from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from ..serializers import RoomSerializer
@@ -51,6 +52,13 @@ def room_detail(request, room_id):
         room.save()
 
         return JsonResponse({"message": "Room data saved successfully"})
+
+
+@api_view(["DELETE"])
+def room_delete(request, room_id):
+    reservation = get_object_or_404(Room, pk=room_id)
+    reservation.delete()
+    return JsonResponse({"message": "success"})
 
 
 @api_view(["POST"])

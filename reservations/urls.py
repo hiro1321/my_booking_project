@@ -7,6 +7,7 @@ urlpatterns = [
     path("csrf-token", common_vi.csrf_token, name="get_csrf_token"),
     path("rooms", common_vi.RoomListView.as_view(), name="room_list"),
     path("rooms/<int:room_id>/", common_vi.room_detail, name="room_details"),
+    path("rooms/<int:room_id>/delete/", common_vi.room_delete, name="room_details"),
     path("rooms/submit/", common_vi.room_submit, name="room_submit"),
     path(
         "reservations/availability-cnt/<str:date>/",
