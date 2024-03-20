@@ -1,7 +1,5 @@
 # ビジネスホテル向けの予約管理システム（サーバー側）
 
-<br/>
-
 ## サービスの URL
 
 https://hiro-booking-project.onrender.com/
