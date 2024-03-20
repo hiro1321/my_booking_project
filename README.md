@@ -1,5 +1,7 @@
 # ビジネスホテル向けの予約管理システム（サーバー側）
 
+<br/>
+
 ## サービスの URL
 
 https://hiro-booking-project.onrender.com/
@@ -12,5 +14,5 @@ https://hiro-booking-project.onrender.com/
 
 ## 機能概要
 
-フロント側の README に記載します。
+フロント側の README に記載します。<br/>
 https://github.com/hiro1321/my_booking_app
